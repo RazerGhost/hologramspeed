@@ -5,16 +5,22 @@ const UnitDisplay = document.getElementById("unitDisplay");
 const AbsIndicator = document.getElementById("absIndicator");
 const HBrakeIndicator = document.getElementById("hBrakeIndicator");
 const RpmDisplay = document.getElementById("rpmBar");
+const seatbelt = document.getElementById("seatbelt");
 const SpeedDisplay = [
 	document.getElementById("speedDisplayDigit_0"),
 	document.getElementById("speedDisplayDigit_1"),
 	document.getElementById("speedDisplayDigit_2"),
 ];
+const FuelDisplay = [
+	document.getElementById("fuelDisplayDigit_0"),
+	document.getElementById("fuelDisplayDigit_1"),
+	document.getElementById("fuelDisplayDigit_2"),
+];
 var useMetric = true;
 
 function changeTheme(name) {
 	const oldThemeElement = document.getElementById("themeStylesheet");
-	
+
 	if (name != "default") {
 		const newThemeElement = document.createElement("link");
 		newThemeElement.href = `css/themes/${name}.css`;
@@ -48,7 +54,26 @@ window.addEventListener("message", function(ev) {
 		if (speedString.length > 3) speedString = "999";
 
 		for (let i = 0; i < 3; i++) {
-			SpeedDisplay[i].innerText = speedString[i] == "&" ? "" : speedString[i]; 
+			SpeedDisplay[i].innerText = speedString[i] == "&" ? "" : speedString[i];
+		}
+	}
+
+	if (data.fuel != undefined) {
+		var fuel = Math.floor(parseFloat(data.fuel));
+		var fuelString = fuel.toString().padStart(3, '&');
+
+		if (fuelString.length > 3) fuelString = "999";
+
+		for (let i = 0; i < 3; i++) {
+			FuelDisplay[i].innerText = fuelString[i] == "&" ? "" : fuelString[i];
+		}
+	}
+
+	if (data.seatbelt != undefined) {
+		if  (data.seatbelt != false ) {
+			seatbelt.style.setProperty("fill", "rgba(45,45,45,0.65)");
+		} else {
+			seatbelt.style.setProperty("fill", "rgba(255, 123, 0, 0.15)");
 		}
 	}
 
@@ -72,7 +97,7 @@ window.addEventListener("message", function(ev) {
 	}
 
 	if (data.hBrake != undefined) HBrakeIndicator.classList.toggle("inactive", data.hBrake == false);
-	
+
 	if (data.abs != undefined) AbsIndicator.classList.toggle("inactive", data.abs == false);
 
 	if (data.display != undefined) DisplayRoot.classList.toggle("hidden", !data.display);

@@ -38,8 +38,8 @@
 	--gear-overload: rgb(255, 0, 0, 0.95);
 	--gear-reverse: rgba(255, 255, 255, 0.95);
 
-	--rpm-background: rgba(193, 193, 193, 0.5);
-	--rpm-fill: rgba(255, 255, 255, 0.85);
+	--rpm-background: rgba(193, 193, 193, 075);
+	--rpm-fill: rgba(74, 194, 214, 0.964);
 }
 
 .hidden {
@@ -115,11 +115,43 @@
 	font-family: 'digital';
 }
 
+#fuelDisplay {
+	position: absolute;
+	bottom: -3px;
+	left: 175px;
+	font-weight: 100;
+	font-family: 'digital';
+}
+#fuelDisplay>span {
+	position: absolute;
+	bottom: 0px;
+}
+#fuelDisplay>span:nth-child(1) {
+	left: 0;
+}
+#fuelDisplay>span:nth-child(2) {
+	left: 15px;
+}
+#fuelDisplay>span:nth-child(3) {
+	left: 30px;
+}
+/* This turns empty fuel segments into grey 0's automatically */
+#fuelDisplay>span:empty::after {
+	color: var(--speed-digit-inactive);
+	content: "0";
+}
+
 #absContainer {
 	position: absolute;
 	left: 180px;
 	bottom: 31px;
 	font-family: 'digital';
+}
+
+#seatbeltContainer {
+	position: absolute;
+	left: 85px;
+	bottom: 1px;
 }
 
 #hBrakeContainer {

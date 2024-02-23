@@ -17,9 +17,10 @@ local duiIsReady                   = false -- Set by a callback triggered by DUI
 local hologramObject               = 0 -- The current DUI anchor. 0 when one does not exist
 local usingMetric, shouldUseMetric = ShouldUseMetricMeasurements() -- Used to track the status of the metric measurement setting
 local textureReplacementMade       = false -- Due to some weirdness with the experimental replace texture native, we need to make the replacement after the anchor has been spawned in-game
+local seatbeltOn 				   = false
 
 -- Preferences
-local displayEnabled = false
+local displayEnabled = true
 local currentTheme   = GetConvar("hsp_defaultTheme", "default")
 
 function DebugPrint(...)
@@ -64,7 +65,7 @@ end
 
 function ToggleDisplay()
 	displayEnabled = not displayEnabled
-	SendChatMessage("Holographic speedometer " .. (displayEnabled and "^2enabled^r" or "^1disabled^r") .. ".") 
+	SendChatMessage("Holographic speedometer " .. (displayEnabled and "^2enabled^r" or "^1disabled^r") .. ".")
 	SavePlayerProfile()
 end
 
@@ -96,6 +97,10 @@ function CheckRange(x, y, z, minVal, maxVal)
 	end
 end
 
+-- Seatbelt Event
+RegisterNetEvent('seatbelt:client:ToggleSeatbelt', function() -- Triggered in smallresources
+    seatbeltOn = not seatbeltOn
+end)
 
 -- Command Handler
 
@@ -103,7 +108,7 @@ function CommandHandler(args)
 
 	local msgErr = "^1The the acceptable range for ^0%s ^1is ^0%f^1 ~ ^0%f^1, reset to default setting.^r"
 	local msgSuc = "^2Speedometer ^0%s ^2changed to ^0%f, %f, %f^r"
-	
+
 	if args[1] == "theme" then
 		if #args >= 2 then
 			TriggerServerEvent('HologramSpeed:CheckTheme', args[2])
@@ -232,7 +237,7 @@ end)
 
 -- Register command
 
-RegisterCommand("hsp", function(_, args)	
+RegisterCommand("hsp", function(_, args)
 	if #args == 0 then
 		ToggleDisplay()
 	else
@@ -275,18 +280,18 @@ CreateThread(function()
 		SendChatMessage("^1Could not find `hologram_box_model` in the game... ^rHave you installed the resource correctly?")
 		return
 	end
-	
+
 	LoadPlayerProfile()
-	
+
 	InitialiseDui()
 
 	-- This thread watches for changes to the user's preferred measurement system
-	CreateThread(function()	
+	CreateThread(function()
 		while true do
 			Wait(1000)
-	
+
 			shouldUseMetric = ShouldUseMetricMeasurements()
-	
+
 			if usingMetric ~= shouldUseMetric and EnsureDuiMessage {useMetric = shouldUseMetric} then
 				usingMetric = shouldUseMetric
 			end
@@ -328,7 +333,7 @@ CreateThread(function()
 					AttachHologramToVehicle(hologramObject,currentVehicle)
 
 					-- Wait until the engine is on before enabling the hologram proper
-					repeat 
+					repeat
 						Wait(0)
 						if GetVehiclePedIsIn(playerPed, false)~=currentVehicle then
 							currentVehicle = GetVehiclePedIsIn(playerPed, false)
@@ -348,8 +353,9 @@ CreateThread(function()
 							abs      = (GetVehicleWheelSpeed(currentVehicle, 0) == 0.0) and (vehicleSpeed > 0.0),
 							hBrake   = GetVehicleHandbrake(currentVehicle),
 							rawSpeed = vehicleSpeed,
+							fuel = GetVehicleFuelLevel(currentVehicle),
+							seatbelt = seatbeltOn
 						}
-
 						-- Wait for the next frame or half a second if we aren't displaying
 						Wait(displayEnabled and UpdateFrequency or 500)
 					until GetPedInVehicleSeat(currentVehicle, -1) ~= PlayerPedId()
@@ -357,7 +363,7 @@ CreateThread(function()
 			end
 		end
 
-		-- At this point, the player is no longer driving a vehicle or was never driving a vehicle this cycle 
+		-- At this point, the player is no longer driving a vehicle or was never driving a vehicle this cycle
 
 		-- If there is a hologram object currently created...
 		if hologramObject ~= 0 and DoesEntityExist(hologramObject) then
@@ -373,7 +379,7 @@ CreateThread(function()
 		Wait(1000)
 	end
 end)
- 
+
 -- Resource cleanup
 
 AddEventHandler("onResourceStop", function(resource)
