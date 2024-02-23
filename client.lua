@@ -374,7 +374,7 @@ CreateThread(function()
 			-- Instead of setting this in the above block, clearing the handle here ensures that the entity must not exist before it's handle is lost.
 			hologramObject = 0
 		end
-
+		seatbeltOn = false
 		-- We don't need to check every single frame for the player being in a vehicle so we check every second
 		Wait(1000)
 	end
